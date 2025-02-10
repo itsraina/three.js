@@ -2,8 +2,6 @@ import Node from '../core/Node.js';
 import { property } from '../core/PropertyNode.js';
 import { addMethodChaining, nodeProxy } from '../tsl/TSLCore.js';
 
-/** @module ConditionalNode **/
-
 /**
  * Represents a logical `if/else` statement. Can be used as an alternative
  * to the `If()`/`Else()` syntax.
@@ -30,7 +28,7 @@ class ConditionalNode extends Node {
 	 *
 	 * @param {Node} condNode - The node that defines the condition.
 	 * @param {Node} ifNode - The node that is evaluate when the condition ends up `true`.
-	 * @param {Node?} [elseNode=null] - The node that is evaluate when the condition ends up `false`.
+	 * @param {?Node} [elseNode=null] - The node that is evaluate when the condition ends up `false`.
 	 */
 	constructor( condNode, ifNode, elseNode = null ) {
 
@@ -53,7 +51,7 @@ class ConditionalNode extends Node {
 		/**
 		 * The node that is evaluate when the condition ends up `false`.
 		 *
-		 * @type {Node?}
+		 * @type {?Node}
 		 * @default null
 		 */
 		this.elseNode = elseNode;
@@ -65,15 +63,27 @@ class ConditionalNode extends Node {
 	 * nodes.
 	 *
 	 * @param {NodeBuilder} builder - The current node builder.
-	 * @return {String} The node type.
+	 * @return {string} The node type.
 	 */
 	getNodeType( builder ) {
 
-		const ifType = this.ifNode.getNodeType( builder );
+		const { ifNode, elseNode } = builder.getNodeProperties( this );
 
-		if ( this.elseNode !== null ) {
+		if ( ifNode === undefined ) {
 
-			const elseType = this.elseNode.getNodeType( builder );
+			// fallback setup
+
+			this.setup( builder );
+
+			return this.getNodeType( builder );
+
+		}
+
+		const ifType = ifNode.getNodeType( builder );
+
+		if ( elseNode !== null ) {
+
+			const elseType = elseNode.getNodeType( builder );
 
 			if ( builder.getTypeLength( elseType ) > builder.getTypeLength( ifType ) ) {
 
@@ -189,18 +199,27 @@ export default ConditionalNode;
 /**
  * TSL function for creating a conditional node.
  *
+ * @tsl
  * @function
  * @param {Node} condNode - The node that defines the condition.
  * @param {Node} ifNode - The node that is evaluate when the condition ends up `true`.
- * @param {Node?} [elseNode=null] - The node that is evaluate when the condition ends up `false`.
+ * @param {?Node} [elseNode=null] - The node that is evaluate when the condition ends up `false`.
  * @returns {ConditionalNode}
  */
 export const select = /*@__PURE__*/ nodeProxy( ConditionalNode );
 
 addMethodChaining( 'select', select );
 
-//
+// Deprecated
 
+/**
+ * @tsl
+ * @function
+ * @deprecated since r168. Use {@link select} instead.
+ *
+ * @param  {...any} params
+ * @returns {ConditionalNode}
+ */
 export const cond = ( ...params ) => { // @deprecated, r168
 
 	console.warn( 'TSL.ConditionalNode: cond() has been renamed to select().' );

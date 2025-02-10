@@ -1,7 +1,6 @@
 import TextureNode from './TextureNode.js';
-import { nodeProxy, vec3, Fn, If } from '../tsl/TSLBase.js';
-
-/** @module Texture3DNode **/
+import { nodeProxy, vec3, Fn, If, int } from '../tsl/TSLBase.js';
+import { textureSize } from './TextureSizeNode.js';
 
 const normal = Fn( ( { texture, uv } ) => {
 
@@ -52,7 +51,7 @@ const normal = Fn( ( { texture, uv } ) => {
 /**
  * This type of uniform node represents a 3D texture.
  *
- * @augments module:TextureNode~TextureNode
+ * @augments TextureNode
  */
 class Texture3DNode extends TextureNode {
 
@@ -66,8 +65,8 @@ class Texture3DNode extends TextureNode {
 	 * Constructs a new 3D texture node.
 	 *
 	 * @param {Data3DTexture} value - The 3D texture.
-	 * @param {Node<vec2|vec3>?} [uvNode=null] - The uv node.
-	 * @param {Node<int>?} [levelNode=null] - The level node.
+	 * @param {?Node<vec2|vec3>} [uvNode=null] - The uv node.
+	 * @param {?Node<int>} [levelNode=null] - The level node.
 	 */
 	constructor( value, uvNode = null, levelNode = null ) {
 
@@ -76,7 +75,7 @@ class Texture3DNode extends TextureNode {
 		/**
 		 * This flag can be used for type testing.
 		 *
-		 * @type {Boolean}
+		 * @type {boolean}
 		 * @readonly
 		 * @default true
 		 */
@@ -88,7 +87,7 @@ class Texture3DNode extends TextureNode {
 	 * Overwrites the default implementation to return a fixed value `'texture3D'`.
 	 *
 	 * @param {NodeBuilder} builder - The current node builder.
-	 * @return {String} The input type.
+	 * @return {string} The input type.
 	 */
 	getInputType( /*builder*/ ) {
 
@@ -112,9 +111,9 @@ class Texture3DNode extends TextureNode {
 	 * Overwritten with an empty implementation since the `updateMatrix` flag is ignored
 	 * for 3D textures. The uv transformation matrix is not applied to 3D textures.
 	 *
-	 * @param {Boolean} value - The update toggle.
+	 * @param {boolean} value - The update toggle.
 	 */
-	setUpdateMatrix( /*updateMatrix*/ ) { } // Ignore .updateMatrix for 3d TextureNode
+	setUpdateMatrix( /*value*/ ) { } // Ignore .updateMatrix for 3d TextureNode
 
 	/**
 	 * Overwrites the default implementation to return the unmodified uv node.
@@ -125,6 +124,22 @@ class Texture3DNode extends TextureNode {
 	 */
 	setupUV( builder, uvNode ) {
 
+		const texture = this.value;
+
+		if ( builder.isFlipY() && ( texture.isRenderTargetTexture === true || texture.isFramebufferTexture === true ) ) {
+
+			if ( this.sampler ) {
+
+				uvNode = uvNode.flipY();
+
+			} else {
+
+				uvNode = uvNode.setY( int( textureSize( this, this.levelNode ).y ).sub( uvNode.y ).sub( 1 ) );
+
+			}
+
+		}
+
 		return uvNode;
 
 	}
@@ -134,7 +149,7 @@ class Texture3DNode extends TextureNode {
 	 *
 	 * @param {NodeBuilder} builder - The current node builder.
 	 * @param {Node} uvNode - The uv node to generate code for.
-	 * @return {String} The generated code snippet.
+	 * @return {string} The generated code snippet.
 	 */
 	generateUV( builder, uvNode ) {
 
@@ -161,10 +176,11 @@ export default Texture3DNode;
 /**
  * TSL function for creating a 3D texture node.
  *
+ * @tsl
  * @function
  * @param {Data3DTexture} value - The 3D texture.
- * @param {Node<vec2|vec3>?} [uvNode=null] - The uv node.
- * @param {Node<int>?} [levelNode=null] - The level node.
+ * @param {?Node<vec2|vec3>} [uvNode=null] - The uv node.
+ * @param {?Node<int>} [levelNode=null] - The level node.
  * @returns {Texture3DNode}
  */
 export const texture3D = /*@__PURE__*/ nodeProxy( Texture3DNode );

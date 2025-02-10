@@ -2,10 +2,8 @@ import ArrayElementNode from '../utils/ArrayElementNode.js';
 import { nodeObject } from '../tsl/TSLCore.js';
 import Node from '../core/Node.js';
 
-/** @module WorkgroupInfoNode **/
-
 /**
- * TODO
+ * Represents an element of a 'workgroup' scoped buffer.
  *
  * @augments ArrayElementNode
  */
@@ -24,7 +22,7 @@ class WorkgroupInfoElementNode extends ArrayElementNode {
 		/**
 		 * This flag can be used for type testing.
 		 *
-		 * @type {Boolean}
+		 * @type {boolean}
 		 * @readonly
 		 * @default true
 		 */
@@ -56,18 +54,25 @@ class WorkgroupInfoElementNode extends ArrayElementNode {
 }
 
 /**
- * TODO
+ * A node allowing the user to create a 'workgroup' scoped buffer within the
+ * context of a compute shader. Typically, workgroup scoped buffers are
+ * created to hold data that is transferred from a global storage scope into
+ * a local workgroup scope. For invocations within a workgroup, data
+ * access speeds on 'workgroup' scoped buffers can be significantly faster
+ * than similar access operations on globally accessible storage buffers.
+ *
+ * This node can only be used with a WebGPU backend.
  *
  * @augments Node
  */
 class WorkgroupInfoNode extends Node {
 
 	/**
-	 * Constructs a new workgroup info node.
+	 * Constructs a new buffer scoped to type scope.
 	 *
-	 * @param {String} scope - TODO.
-	 * @param {String} bufferType - The buffer type.
-	 * @param {Number} [bufferCount=0] - The buffer count.
+	 * @param {string} scope - TODO.
+	 * @param {string} bufferType - The data type of a 'workgroup' scoped buffer element.
+	 * @param {number} [bufferCount=0] - The number of elements in the buffer.
 	 */
 	constructor( scope, bufferType, bufferCount = 0 ) {
 
@@ -76,14 +81,14 @@ class WorkgroupInfoNode extends Node {
 		/**
 		 * The buffer type.
 		 *
-		 * @type {String}
+		 * @type {string}
 		 */
 		this.bufferType = bufferType;
 
 		/**
 		 * The buffer count.
 		 *
-		 * @type {Number}
+		 * @type {number}
 		 * @default 0
 		 */
 		this.bufferCount = bufferCount;
@@ -91,16 +96,23 @@ class WorkgroupInfoNode extends Node {
 		/**
 		 * This flag can be used for type testing.
 		 *
-		 * @type {Boolean}
+		 * @type {boolean}
 		 * @readonly
 		 * @default true
 		 */
 		this.isWorkgroupInfoNode = true;
 
 		/**
+		 * The data type of the array buffer.
+		 *
+		 * @type {string}
+		 */
+		this.elementType = bufferType;
+
+		/**
 		 * TODO.
 		 *
-		 * @type {String}
+		 * @type {string}
 		 */
 		this.scope = scope;
 
@@ -109,7 +121,7 @@ class WorkgroupInfoNode extends Node {
 	/**
 	 * Sets the name/label of this node.
 	 *
-	 * @param {String} name - The name to set.
+	 * @param {string} name - The name to set.
 	 * @return {WorkgroupInfoNode} A reference to this node.
 	 */
 	label( name ) {
@@ -123,7 +135,7 @@ class WorkgroupInfoNode extends Node {
 	/**
 	 * Sets the scope of this node.
 	 *
-	 * @param {String} scope - The scope to set.
+	 * @param {string} scope - The scope to set.
 	 * @return {WorkgroupInfoNode} A reference to this node.
 	 */
 	setScope( scope ) {
@@ -134,12 +146,24 @@ class WorkgroupInfoNode extends Node {
 
 	}
 
+
+	/**
+	 * The data type of the array buffer.
+	 *
+	 * @return {string} The element type.
+	 */
+	getElementType() {
+
+		return this.elementType;
+
+	}
+
 	/**
 	 * Overwrites the default implementation since the input type
 	 * is inferred from the scope.
 	 *
 	 * @param {NodeBuilder} builder - The current node builder.
-	 * @return {String} The input type.
+	 * @return {string} The input type.
 	 */
 	getInputType( /*builder*/ ) {
 
@@ -171,10 +195,12 @@ export default WorkgroupInfoNode;
 
 /**
  * TSL function for creating a workgroup info node.
+ * Creates a new 'workgroup' scoped array buffer.
  *
+ * @tsl
  * @function
- * @param {String} type - The buffer type.
- * @param {Number} [count=0] - The buffer count.
+ * @param {string} type - The data type of a 'workgroup' scoped buffer element.
+ * @param {number} [count=0] - The number of elements in the buffer.
  * @returns {WorkgroupInfoNode}
  */
 export const workgroupArray = ( type, count ) => nodeObject( new WorkgroupInfoNode( 'Workgroup', type, count ) );

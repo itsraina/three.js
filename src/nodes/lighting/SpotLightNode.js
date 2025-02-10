@@ -23,21 +23,21 @@ class SpotLightNode extends AnalyticLightNode {
 	/**
 	 * Constructs a new spot light node.
 	 *
-	 * @param {SpotLight?} [light=null] - The spot light source.
+	 * @param {?SpotLight} [light=null] - The spot light source.
 	 */
 	constructor( light = null ) {
 
 		super( light );
 
 		/**
-		 * Uniform node representing the cone cosinus.
+		 * Uniform node representing the cone cosine.
 		 *
 		 * @type {UniformNode<float>}
 		 */
 		this.coneCosNode = uniform( 0 ).setGroup( renderGroup );
 
 		/**
-		 * Uniform node representing the penumbra cosinus.
+		 * Uniform node representing the penumbra cosine.
 		 *
 		 * @type {UniformNode<float>}
 		 */
